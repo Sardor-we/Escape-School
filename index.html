@@ -1,32 +1,84 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escape School 3D</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Escape School 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="game"></div>
+<!-- ===== 1. O'YIN MAYDONI (3D) ===== -->
+<canvas id="c"></canvas>
 
-    <div id="hud">
-        <div class="title">🏫 ESCAPE SCHOOL</div>
-        <div>🔑 Kalit: <span id="keyStatus">YO‘Q</span></div>
-        <div id="message">Maktabdan chiqish uchun kalitni top!</div>
-    </div>
+<!-- ===== 2. HUD (o'yin vaqtida ko'rinadi) ===== -->
+<div id="hud" class="hidden">
+  <div id="keyInfo">🔑 Kalit: YO‘Q</div>
+  <div id="roomInfo"></div>
+  <div id="team"></div>
+  <div id="cross">+</div>
+  <div id="msg"></div>
+  <div id="flash"></div>
+</div>
 
-    <div id="crosshair">+</div>
+<!-- ===== 3. JUMBOQ OYNASI ===== -->
+<div id="puzzle" class="hidden">
+  <p id="pq"></p>
+  <div id="pa"></div>
+  <button id="pclose" class="ghost">Yopish</button>
+</div>
 
-    <div id="startScreen">
-        <h1>ESCAPE SCHOOL</h1>
-        <p>Sirli maktabdan chiqish yo‘lini top.</p>
-        <p>W A S D — yurish</p>
-        <p>Sichqoncha — qarash</p>
-        <button id="startButton">O‘YINNI BOSHLASH</button>
-    </div>
+<!-- ===== 4. TELEFON BOSHQARUVI ===== -->
+<div id="touch" class="hidden">
+  <div id="stick"><i id="knob"></i></div>
+  <button id="act">E</button>
+</div>
 
-    <script type="module" src="script.js"></script>
+<!-- ===== 5. BOSH MENYU ===== -->
+<div id="menu" class="screen">
+  <h1>ESCAPE SCHOOL</h1>
+  <p class="sub">Sirli maktabdan chiqish yo‘lini top.</p>
 
+  <h2>Maktab nechta xonali bo‘lsin?</h2>
+  <div class="row" id="sizes">
+    <button data-n="100" class="on">100</button>
+    <button data-n="200">200</button>
+    <button data-n="500">500</button>
+    <button data-n="1000">1000</button>
+    <input id="custom" type="number" min="10" max="2000" placeholder="o‘zingiz">
+  </div>
+
+  <h2>Qanday o‘ynaysiz?</h2>
+  <div class="row">
+    <button id="btnSolo" class="big">Yakka o‘yin</button>
+    <button id="btnHost" class="big">Do‘stlar bilan: xona yaratish</button>
+  </div>
+  <div class="row">
+    <input id="joinCode" maxlength="5" placeholder="Xona kodi">
+    <button id="btnJoin">Qo‘shilish</button>
+  </div>
+  <p id="status"></p>
+  <button id="btnGo" class="big hidden">O‘YINNI BOSHLASH</button>
+
+  <p class="help">
+    <b>W A S D</b> — yurish &nbsp; <b>Sichqoncha</b> — qarash &nbsp; <b>Shift</b> — yugurish<br>
+    <b>E</b> — jumboq / eshik / do‘stni tiriltirish (ushlab turing)<br>
+    Telefonda: chap tomonda joystik, o‘ng tomonni suring — qarash.
+  </p>
+</div>
+
+<!-- ===== 6. O'LDINGIZ / YUTDINGIZ ===== -->
+<div id="end" class="screen hidden">
+  <h1 id="endTitle"></h1>
+  <p id="endText" class="sub"></p>
+  <button id="btnAgain" class="big">Qayta o‘ynash</button>
+</div>
+
+<!-- ===== 7. KUTUBXONALAR VA O'YIN KODI ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
