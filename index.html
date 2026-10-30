@@ -77,6 +77,11 @@
   <p id="endText" class="sub"></p>
   <button id="btnAgain" class="big">Qayta o‘ynash</button>
 </div>
+
+<!-- ===== 7. KUTUBXONALAR VA O'YIN KODI ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="script.js"></script>
 <script>
 (function () {
   const marks = [];
@@ -124,16 +129,11 @@
     window.addEventListener('mousedown', e => {
       if (e.button === 2 && e.target.tagName === 'CANVAS') placeMark();
     });
-    window.addEventListener('keydown', e => {   // C — hammasini tozalash
+    window.addEventListener('keydown', e => {   // C: hammasini tozalash
       if (e.code === 'KeyC') { marks.forEach(m => scene.remove(m)); marks.length = 0; }
     });
   }, 200);
 })();
 </script>
-
-<!-- ===== 7. KUTUBXONALAR VA O'YIN KODI ===== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="script.js"></script>
 </body>
 </html>
