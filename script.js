@@ -63,7 +63,7 @@ addEventListener('resize', resize); resize();
 
 const lam = c => new THREE.MeshLambertMaterial({ color: c }), bas = c => new THREE.MeshBasicMaterial({ color: c });
 const M = { w: lam(0x6b705f), f1: lam(0x4a4640), f2: lam(0x3d3a35), ceil: lam(0x2a2a2a), desk: lam(0x6b4a2b),
-  door: lam(0x7a1a1a), blood: bas(0x3a0000), term: bas(0x2288ff), key: bas(0xffd700), exit: bas(0x22ff66) };
+  door: lam(0x7a1a1a), blood: bas(0x3a0000), term: bas(0x2288ff), key: bas(0xffd700), exit: bas(0x22ff66), mark: bas(0xffe14a) };
 const BOX = new THREE.BoxGeometry(1, 1, 1), PLANE = new THREE.PlaneGeometry(1, 1);
 
 /* ---------- 4. XONALAR (faqat yaqindagilari yuklanadi) ---------- */
@@ -117,6 +117,7 @@ function loadRoom(i) {
   // chiqish eshigi (0-xona)
   if (i === 0) box(M.exit, .1, 3, DOOR, -4.75, 1.5, 0, 0);
 
+  (marks.get(i) || []).forEach(m => addMark(g, m)); // oldin qoldirilgan chiziqchalar
   scene.add(g); rooms.set(i, room);
 }
 function updateRooms(ci) {
@@ -180,6 +181,36 @@ $('act').addEventListener('touchend', () => actHeld = false);
 
 function say(t, ms = 2200) { $('msg').textContent = t; msgT = ms / 1000; }
 function flash() { const f = $('flash'); f.classList.add('on'); setTimeout(() => f.classList.remove('on'), 120); navigator.vibrate?.(200); }
+
+/* ---------- 5b. CHIZIQCHA QOLDIRISH (sichqonchaning o'ng tugmasi) ---------- */
+// Cheksiz: har bir xona uchun ro'yxatda saqlanadi, xona qayta yuklansa ham yo'qolmaydi.
+const marks = new Map(), ray = new THREE.Raycaster(); ray.far = 7;
+function addMark(g, m) {
+  const n = new THREE.Vector3(m.nx, m.ny, m.nz), s = new THREE.Mesh(PLANE, M.mark);
+  s.userData.mk = 1; s.scale.set(.5, .07, 1);
+  s.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+  if (Math.abs(m.ny) > .5) s.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(n, m.yaw)); // polda/shiftda burilish
+  s.position.set(m.x + n.x * .03, m.y + n.y * .03, m.z + n.z * .03); g.add(s);
+}
+function storeMark(i, m) {
+  if (!marks.has(i)) marks.set(i, []);
+  marks.get(i).push(m);
+  const r = rooms.get(i); if (r) addMark(r.g, m);
+}
+function mark() {
+  if (!running || me.dead || puzzleOpen) return;
+  ray.setFromCamera({ x: 0, y: 0 }, cam);
+  const objs = []; rooms.forEach(r => r.g.children.forEach(o => { if (o.isMesh && o.visible && !o.userData.mk) objs.push(o); }));
+  const h = ray.intersectObjects(objs, false)[0]; if (!h) return say('Juda uzoq', 800);
+  let idx = -1; rooms.forEach((r, j) => { if (r.g === h.object.parent) idx = j; });
+  if (idx < 0) return;
+  const g = rooms.get(idx).g, n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
+  const m = { x: h.point.x - g.position.x, y: h.point.y, z: h.point.z - g.position.z, nx: n.x, ny: n.y, nz: n.z, yaw: me.yaw };
+  storeMark(idx, m); send({ t: 'mark', i: idx, m });
+}
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('mousedown', e => { if (e.button === 2) mark(); });
+$('markBtn').addEventListener('touchstart', e => { e.preventDefault(); mark(); }, { passive: false });
 
 /* ---------- 6. JUMBOQLAR ---------- */
 const RIDDLES = [
@@ -296,6 +327,7 @@ function handle(m) {
       if (m.id === Net.id) revive(); else if (Net.players[m.id]) { Net.players[m.id].dead = false; Net.players[m.id].inv = 4; }
       if (Net.mode === 'host') { const p = Net.players[m.id], px = m.id === Net.id ? me.x : p && p.x, pz = m.id === Net.id ? me.z : p && p.z; placeMonster(px || 0, pz || 0); }
       break;
+    case 'mark': storeMark(m.i, m.m); break;
     case 'win': win(false); break;
     case 'over': endGame(false); break;
   }
@@ -329,7 +361,7 @@ function refreshKey() { const k = $('keyInfo'); k.textContent = hasKey ? '🔑 K
 
 function startGame() {
   clearRooms(); solved.clear(); Object.values(Net.players).forEach(p => p.mesh && scene.remove(p.mesh)); Net.players = {};
-  hasKey = false; me.x = me.z = 0; me.yaw = 0; me.pitch = 0; me.dead = false; me.inv = 3; reviveT = 0;
+  marks.clear(); hasKey = false; me.x = me.z = 0; me.yaw = 0; me.pitch = 0; me.dead = false; me.inv = 3; reviveT = 0;
   genMaze(); placeMonster(0, 0); mon.tx = mon.x; mon.tz = mon.z;
   ['menu', 'end'].forEach(i => $(i).classList.add('hidden'));
   $('hud').classList.remove('hidden'); $('touch').classList.toggle('hidden', !isTouch);
