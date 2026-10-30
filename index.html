@@ -77,6 +77,59 @@
   <p id="endText" class="sub"></p>
   <button id="btnAgain" class="big">Qayta o‘ynash</button>
 </div>
+<script>
+(function () {
+  const marks = [];
+  let scene = null, camera = null;
+
+  const wait = setInterval(() => {
+    if (!window.THREE || !THREE.WebGLRenderer) return;
+    clearInterval(wait);
+
+    const origRender = THREE.WebGLRenderer.prototype.render;
+    THREE.WebGLRenderer.prototype.render = function (s, c) {
+      if (s && s.isScene) { scene = s; camera = c; }
+      return origRender.apply(this, arguments);
+    };
+
+    const ray = new THREE.Raycaster();
+    ray.far = 12;
+    const geo = new THREE.BoxGeometry(0.35, 0.04, 0.02);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xff2d2d });
+
+    function placeMark() {
+      if (!scene || !camera) return;
+      ray.setFromCamera(new THREE.Vector2(0, 0), camera);
+      const hits = ray.intersectObjects(scene.children, true)
+        .filter(h => h.object.isMesh && h.face && !marks.includes(h.object));
+      if (!hits.length) return;
+
+      const h = hits[0];
+      const n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
+      const mark = new THREE.Mesh(geo, mat);
+      mark.position.copy(h.point).addScaledVector(n, 0.02);
+
+      if (Math.abs(n.y) > 0.9) {
+        const d = new THREE.Vector3();
+        camera.getWorldDirection(d);
+        mark.up.set(d.x, 0, d.z).normalize();
+      }
+      mark.lookAt(mark.position.clone().add(n));
+
+      scene.add(mark);
+      marks.push(mark);
+    }
+
+    window.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('mousedown', e => {
+      if (e.button === 2 && e.target.tagName === 'CANVAS') placeMark();
+    });
+    window.addEventListener('keydown', e => {   // C — hammasini tozalash
+      if (e.code === 'KeyC') { marks.forEach(m => scene.remove(m)); marks.length = 0; }
+    });
+  }, 200);
+})();
+</script>
 
 <!-- ===== 7. KUTUBXONALAR VA O'YIN KODI ===== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
