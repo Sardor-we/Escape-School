@@ -453,3 +453,48 @@ $('btnGo').onclick = () => {
   seed = Math.random() * 1e9 | 0; send({ t: 'start', N, seed }); startGame(); $('c').requestPointerLock?.();
 };
 $('btnAgain').onclick = () => location.reload();
+// === O'ng tugma: kichkina chiziqcha qoldirish ===
+(function () {
+  const MAX_MARKS = 150;                 // juda ko'p bo'lsa o'yin sekinlashadi, eskisi o'chadi
+  const marks = [];
+  const ray = new THREE.Raycaster();
+  ray.far = 12;
+  const geo = new THREE.BoxGeometry(0.35, 0.04, 0.02);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff2d2d });
+
+  function placeMark() {
+    ray.setFromCamera(new THREE.Vector2(0, 0), camera);   // ekran markaziga qarab
+    const hits = ray.intersectObjects(scene.children, true)
+      .filter(h => h.object.isMesh && h.face && !marks.includes(h.object));
+    if (!hits.length) return;
+
+    const h = hits[0];
+    const n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
+    const mark = new THREE.Mesh(geo, mat);
+    mark.position.copy(h.point).addScaledVector(n, 0.02);
+
+    // polga qo'yilsa chiziq qarash yo'nalishiga ko'ndalang yotadi
+    if (Math.abs(n.y) > 0.9) {
+      const d = new THREE.Vector3();
+      camera.getWorldDirection(d);
+      mark.up.set(d.x, 0, d.z).normalize();
+    }
+    mark.lookAt(mark.position.clone().add(n));
+
+    scene.add(mark);
+    marks.push(mark);
+    if (marks.length > MAX_MARKS) scene.remove(marks.shift());
+  }
+
+  // brauzerning o'ng tugma menyusini o'chirish
+  window.addEventListener('contextmenu', e => e.preventDefault());
+
+  window.addEventListener('mousedown', e => {
+    if (e.button === 2) placeMark();     // faqat o'ng tugma
+  });
+
+  // ixtiyoriy: C tugmasi hammasini tozalaydi
+  window.addEventListener('keydown', e => {
+    if (e.code === 'KeyC') { marks.forEach(m => scene.remove(m)); marks.length = 0; }
+  });
+})();
