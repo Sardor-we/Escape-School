@@ -1,29 +1,84 @@
 <!DOCTYPE html>
-<html lang="uz"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Escape School 3D</title>
-<link rel="stylesheet" href="style.css"></head><body>
-<div id="hud"></div><div id="pr"></div><div id="cx"></div><div id="ms2"></div><div id="vg"></div>
-<div id="tc" hidden><div id="lk"></div><div id="js"></div>
-<div class="bt" id="bE" style="right:16px;bottom:120px">E</div>
-<div class="bt" id="bF" style="right:84px;bottom:60px">F</div>
-<div class="bt" id="bR" style="right:16px;bottom:200px">⤓</div></div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<div class="ov" id="menu"><div class="card">
-<h1>🏫 ESCAPE SCHOOL</h1>
-<input id="nm" placeholder="Ismingizni yozing" maxlength="14">
-<button id="b1">Yakkaxon oʻynash</button>
-<button class="g" id="b2">Ulanib oʻynash (xona yaratish)</button>
-<div class="row"><input id="cd" placeholder="6 xonali xona kodi" maxlength="6" inputmode="numeric"><button class="g" id="b3">Kirish</button></div>
-<div id="ms"></div><div id="pl"></div><button id="bs" hidden>Oʻyinni boshlash</button>
-<small>WASD — yurish, Shift — yugurish, sichqoncha — qarash, E — olish/ochish, R — oʻtirish/turish, zinadan yurib qavatlarga chiqing (oʻng zina — yuqoriga, chap zina — pastga), F — tosh/stul otish. Maqsad: mashinani tuzatib, setkali darvozani buzib qoching!</small>
-</div></div>
+<!-- ===== 1. O'YIN MAYDONI (3D) ===== -->
+<canvas id="c"></canvas>
 
-<div class="ov" id="qo" hidden><div class="card">
-<b id="qq"></b><input id="qa" autocomplete="off" placeholder="Javob"><div id="qm"></div>
-<div class="row"><button id="qb">Javob berish</button><button class="g" id="qc">Yopish</button></div></div></div>
+<!-- ===== 2. HUD (o'yin vaqtida ko'rinadi) ===== -->
+<div id="hud" class="hidden">
+  <div id="keyInfo">🔑 Kalit: YO‘Q</div>
+  <div id="roomInfo"></div>
+  <div id="team"></div>
+  <div id="cross">+</div>
+  <div id="msg"></div>
+  <div id="flash"></div>
+</div>
 
-<div class="ov" id="end" hidden><div class="card"><h1 id="et"></h1><button onclick="location.reload()">Qayta oʻynash</button></div></div>
+<!-- ===== 3. JUMBOQ OYNASI ===== -->
+<div id="puzzle" class="hidden">
+  <p id="pq"></p>
+  <div id="pa"></div>
+  <button id="pclose" class="ghost">Yopish</button>
+</div>
 
+<!-- ===== 4. TELEFON BOSHQARUVI ===== -->
+<div id="touch" class="hidden">
+  <div id="stick"><i id="knob"></i></div>
+  <button id="act">E</button>
+</div>
+
+<!-- ===== 5. BOSH MENYU ===== -->
+<div id="menu" class="screen">
+  <h1>ESCAPE SCHOOL</h1>
+  <p class="sub">Sirli maktabdan chiqish yo‘lini top.</p>
+
+  <h2>Maktab nechta xonali bo‘lsin?</h2>
+  <div class="row" id="sizes">
+    <button data-n="100" class="on">100</button>
+    <button data-n="200">200</button>
+    <button data-n="500">500</button>
+    <button data-n="1000">1000</button>
+    <input id="custom" type="number" min="10" max="2000" placeholder="o‘zingiz">
+  </div>
+
+  <h2>Qanday o‘ynaysiz?</h2>
+  <div class="row">
+    <button id="btnSolo" class="big">Yakka o‘yin</button>
+    <button id="btnHost" class="big">Do‘stlar bilan: xona yaratish</button>
+  </div>
+  <div class="row">
+    <input id="joinCode" maxlength="5" placeholder="Xona kodi">
+    <button id="btnJoin">Qo‘shilish</button>
+  </div>
+  <p id="status"></p>
+  <button id="btnGo" class="big hidden">O‘YINNI BOSHLASH</button>
+
+  <p class="help">
+    <b>W A S D</b> — yurish &nbsp; <b>Sichqoncha</b> — qarash &nbsp; <b>Shift</b> — yugurish<br>
+    <b>E</b> — jumboq / eshik / do‘stni tiriltirish (ushlab turing)<br>
+    Telefonda: chap tomonda joystik, o‘ng tomonni suring — qarash.
+  </p>
+</div>
+
+<!-- ===== 6. O'LDINGIZ / YUTDINGIZ ===== -->
+<div id="end" class="screen hidden">
+  <h1 id="endTitle"></h1>
+  <p id="endText" class="sub"></p>
+  <button id="btnAgain" class="big">Qayta o‘ynash</button>
+</div>
+
+<!-- ===== 7. KUTUBXONALAR VA O'YIN KODI ===== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="script.js"></script></body></html>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
